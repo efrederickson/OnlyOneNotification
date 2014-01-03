@@ -1,0 +1,10 @@
+{
+	entry = {
+		bundle = OONSettings;
+		cell = PSLinkCell;
+		detail = "OONSettingsListController";
+		icon = "OONSettings.png";
+		isController = 1;
+		label = OnlyOneNotification;
+	};
+}

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>OnlyOneNotification</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>label</key>
+			<string>Enabled</string>
+                        <key>PostNotification</key>
+                        <string>com.lodc.ios.oon/reloadSettings</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>disableNoise</string>
+			<key>label</key>
+			<string>Disable sounds for notifications</string>
+                        <key>PostNotification</key>
+                        <string>com.lodc.ios.oon/reloadSettings</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>OnlyOneNotification</string>
+</dict>
+</plist>
