@@ -2,6 +2,7 @@
 
 static BOOL enabled = YES;
 static BOOL disableNoise = YES;
+static BOOL disableAllNotifications = YES;
 
 static void reloadSettings(CFNotificationCenterRef center,
                                     void *observer,
@@ -9,8 +10,8 @@ static void reloadSettings(CFNotificationCenterRef center,
                                     const void *object,
                                     CFDictionaryRef userInfo)
 {
-    NSDictionary *prefs = [[NSDictionary 
-        dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"] retain];
+    NSDictionary *prefs = [NSDictionary 
+        dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
     
     if ([prefs objectForKey:@"enabled"] != nil)
         enabled = [[prefs objectForKey:@"enabled"] boolValue];
@@ -22,6 +23,11 @@ static void reloadSettings(CFNotificationCenterRef center,
     else
         disableNoise = YES;
 
+    if ([prefs objectForKey:@"disableAllNotifications"] != nil)    
+        disableAllNotifications = [[prefs objectForKey:@"disableAllNotifications"] boolValue];
+    else
+        disableAllNotifications = NO;
+
     NSLog(@"OnlyOneNotification: preferences updated");
 }
 
@@ -30,7 +36,7 @@ static void reloadSettings(CFNotificationCenterRef center,
 - (void)turnOnScreenIfNecessaryForItem:(id)arg1
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if ([li count] > 1 && enabled)
+    if (([li count] > 1 && enabled) || disableAllNotifications)
         return;
     %orig;
 }
