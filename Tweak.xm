@@ -29,6 +29,7 @@ static void reloadSettings(CFNotificationCenterRef center,
         disableAllNotifications = NO;
 
     NSLog(@"OnlyOneNotification: preferences updated");
+    //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", disableAllNotifications ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
 }
 
 %hook SBLockScreenNotificationListController
@@ -44,7 +45,7 @@ static void reloadSettings(CFNotificationCenterRef center,
 - (_Bool)shouldPlaySoundForItem:(id)arg1
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if ([li count] > 1 && disableNoise && enabled)
+    if (([li count] > 1 && disableNoise && enabled) || (enabled && disableAllNotifications && disableNoise))
         return NO;
     return %orig;
 }
