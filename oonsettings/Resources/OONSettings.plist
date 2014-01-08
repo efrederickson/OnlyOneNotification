@@ -52,6 +52,59 @@
 			<key>PostNotification</key>
 			<string>com.lodc.ios.oon/reloadSettings</string>
 		</dict>
+                <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+                        <key>label</key>
+                        <string>Developer information</string>
+		</dict>
+                <dict>
+			<key>action</key>
+			<string>openTwitter</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>@mlnlover11 on Twitter</string>
+		</dict>
+                <dict>
+			<key>action</key>
+			<string>openGithub</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>@mlnlover11 on GitHub</string>
+		</dict>
+                <dict>
+			<key>action</key>
+			<string>sendEmail</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Contact developer via email</string>
+		</dict>
+                <dict>
+			<key>action</key>
+			<string>donatePaypal</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Donate via Paypal</string>
+		</dict>
+                <dict>
+			<key>action</key>
+			<string>donateBitcoin</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Donate via Bitcoin</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Copyright (C) 2014 Elijah Frederickson</string>
+		</dict>
+
 	</array>
 	<key>title</key>
 	<string>OnlyOneNotification</string>
