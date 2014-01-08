@@ -37,7 +37,7 @@ static void reloadSettings(CFNotificationCenterRef center,
 - (void)turnOnScreenIfNecessaryForItem:(id)arg1
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if (([li count] > 1 && enabled) || disableAllNotifications)
+    if (([li count] > 1 && enabled) || (enabled && disableAllNotifications))
         return;
     %orig;
 }

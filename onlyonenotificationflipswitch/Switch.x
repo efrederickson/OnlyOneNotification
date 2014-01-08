@@ -1,5 +1,6 @@
 #import "FSSwitchDataSource.h"
 #import "FSSwitchPanel.h"
+#import <notify.h>
 
 @interface OnlyOneNotificationFlipswitchSwitch : NSObject <FSSwitchDataSource>
 @end
@@ -21,8 +22,9 @@
     if (newState == FSSwitchStateIndeterminate)
         return;
     NSMutableDictionary *prefs = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
-    [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"enabled"];
+    [prefs setObject:[NSNumber numberWithBool:newState] forKey:@"enabled"];
     [prefs writeToFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist" atomically:YES];
+    notify_post("com.lodc.ios.oon/reloadSettings");
 }
 
 @end
