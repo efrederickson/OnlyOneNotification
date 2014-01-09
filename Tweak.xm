@@ -57,4 +57,5 @@ static void reloadSettings(CFNotificationCenterRef center,
      // Register for the preferences-did-change notification
     CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
     CFNotificationCenterAddObserver(r, NULL, &reloadSettings, CFSTR("com.lodc.ios.oon/reloadSettings"), NULL, 0);
+    reloadSettings(nil, nil, nil, nil, nil);
 }
