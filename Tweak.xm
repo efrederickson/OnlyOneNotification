@@ -1,8 +1,17 @@
 #import <substrate.h>
 
+@interface BBBulletin
+- (id)title;
+@end
+
 static BOOL enabled = YES;
 static BOOL disableNoise = YES;
-static BOOL disableAllNotifications = YES;
+static BOOL blockFirstAsWell = YES;
+static NSMutableDictionary *notifs = [[NSMutableDictionary alloc] init];
+static BOOL blockAfterFirstOfEachTitle = YES;
+static BOOL allowAfterAWhile = YES;
+static int timeToWait = 90;
+static NSDate *lastNotificationTime = nil;
 
 static void reloadSettings(CFNotificationCenterRef center,
                                     void *observer,
@@ -23,33 +32,161 @@ static void reloadSettings(CFNotificationCenterRef center,
     else
         disableNoise = YES;
 
-    if ([prefs objectForKey:@"disableAllNotifications"] != nil)    
-        disableAllNotifications = [[prefs objectForKey:@"disableAllNotifications"] boolValue];
+    if ([prefs objectForKey:@"blockFirstAsWell"] != nil)    
+        blockFirstAsWell = [[prefs objectForKey:@"blockFirstAsWell"] boolValue];
     else
-        disableAllNotifications = NO;
+        blockFirstAsWell = NO;
 
-    NSLog(@"OnlyOneNotification: preferences updated");
-    //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", disableAllNotifications ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
+    if ([prefs objectForKey:@"blockAfterFirstOfEachTitle"] != nil)    
+        blockAfterFirstOfEachTitle = [[prefs objectForKey:@"blockAfterFirstOfEachTitle"] boolValue];
+    else
+        blockAfterFirstOfEachTitle = YES;
+
+    if ([prefs objectForKey:@"allowAfterAWhile"] != nil)    
+        allowAfterAWhile = [[prefs objectForKey:@"allowAfterAWhile"] boolValue];
+    else
+        allowAfterAWhile = YES;
+
+    if ([prefs objectForKey:@"timeToWait"] != nil)    
+        timeToWait = [[prefs objectForKey:@"timeToWait"] intValue];
+    else
+        timeToWait = 90;
+
+    //NSLog(@"OnlyOneNotification: preferences updated");
+    //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", blockFirstAsWell ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
 }
+
+static BOOL hasItBeenAWhile()
+{
+    NSDate *now = [NSDate date];
+
+    NSTimeInterval distanceBetweenDates = [now timeIntervalSinceDate:lastNotificationTime];
+
+    if (distanceBetweenDates > (timeToWait * 60))
+        return true;
+    return false;
+}
+
+static int updateCount(NSString *item)
+{
+    if (item == nil)
+        return 0;
+
+    id i1 = [notifs objectForKey:item];
+    int count;
+    if (i1 == nil)
+        count = 0;
+    else
+        count = [i1 intValue] + 1;
+
+    [notifs setObject:[NSNumber numberWithInt:count] forKey:item];
+    return count;
+}
+
+/*
+static int getCount(NSString *item)
+{
+    if (item == 
+    id i1 = [notifs objectForKey:item];
+    int count;
+    if (i1 == nil)
+        count = 0;
+    else
+        count = [i1 intValue];
+    return count;
+}
+*/
 
 %hook SBLockScreenNotificationListController
 
-- (void)turnOnScreenIfNecessaryForItem:(id)arg1
+- (void)turnOnScreenIfNecessaryForItem:(BBBulletin*)arg1
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if (([li count] > 1 && enabled) || (enabled && disableAllNotifications))
-        return;
+
+    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO)
+    {
+        if (allowAfterAWhile)
+        {
+            if (hasItBeenAWhile())
+            { }
+            else 
+            {
+                lastNotificationTime = [[NSDate date] retain];
+                return;
+            }
+        }
+        else
+        {
+            lastNotificationTime = [[NSDate date] retain];
+            return;
+        }
+    }
+
+    if (enabled && blockAfterFirstOfEachTitle && updateCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1))
+    {
+        if (allowAfterAWhile)
+        {
+            if (hasItBeenAWhile())
+            { }
+            else
+            {
+                lastNotificationTime = [[NSDate date] retain];
+                return;
+            }
+        }
+        else
+        {
+            lastNotificationTime = [[NSDate date] retain];
+            return;
+        }
+    }
+
     %orig;
+    lastNotificationTime = [[NSDate date] retain];
 }
 
-- (_Bool)shouldPlaySoundForItem:(id)arg1
+- (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if (([li count] > 1 && disableNoise && enabled) || (enabled && disableAllNotifications && disableNoise))
+    if (([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise))
         return NO;
     return %orig;
+
+    /*
+    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO && disableNoise)
+    {
+        if (allowAfterAWhile)
+        {
+            if (hasItBeenAWhile() == NO)
+                return NO;
+        }
+        else
+            return NO;
+    }
+
+    if (enabled && blockAfterFirstOfEachTitle && getCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1) && disableNoise)
+    {
+        if (allowAfterAWhile)
+        {
+            if (hasItBeenAWhile() == NO)
+                return NO;
+        }
+        else
+            return NO;
+    }
+
+    return %orig;
+    */
 }
 
+%end
+
+%hook SBLockStateAggregator
+-(void)_updateLockState
+{
+    %orig;
+    notifs = [[[NSMutableDictionary alloc] init] retain]; // Clear state
+}
 %end
 
 %ctor

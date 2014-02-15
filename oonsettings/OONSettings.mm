@@ -40,4 +40,17 @@
 
 @end
 
+@interface OONHelpListController: PSListController {
+}
+@end
+
+@implementation OONHelpListController
+- (id)specifiers {
+	if(_specifiers == nil) {
+		_specifiers = [[self loadSpecifiersFromPlistName:@"OONHelp" target:self] retain];
+	}
+	return _specifiers;
+}
+@end
+
 // vim:ft=objc

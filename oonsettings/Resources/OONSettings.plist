@@ -32,7 +32,7 @@
 			<key>defaults</key>
 			<string>com.lodc.ios.oonsettings</string>
 			<key>key</key>
-			<string>disableAllNotifications</string>
+			<string>blockFirstAsWell</string>
 			<key>label</key>
 			<string>Block first as well</string>
 			<key>PostNotification</key>
@@ -51,6 +51,72 @@
 			<string>Disable sounds for notifications</string>
 			<key>PostNotification</key>
 			<string>com.lodc.ios.oon/reloadSettings</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>blockAfterFirstOfEachTitle</string>
+			<key>label</key>
+			<string>Block after first of each title</string>
+			<key>PostNotification</key>
+			<string>com.lodc.ios.oon/reloadSettings</string>
+		</dict> 
+                <dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>allowAfterAWhile</string>
+			<key>label</key>
+			<string>Allow after a while</string>
+			<key>PostNotification</key>
+			<string>com.lodc.ios.oon/reloadSettings</string>
+		</dict> 
+                <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+                        <key>label</key>
+                        <string>Length of a while (minutes)</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>180</integer>
+			<key>default</key>
+			<integer>90</integer>
+			<key>showValue</key>
+			<true/>
+			<key>key</key>
+			<string>timeToWait</string>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>PostNotification</key>
+			<string>com.locd.ios.oon/reloadSettings</string>
+		</dict>
+                <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+                        <key>label</key>
+                        <string></string>
+		</dict>
+ 		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>detail</key>
+			<string>OONHelpListController</string>
+			<key>label</key>
+			<string>Help</string>
 		</dict>
                 <dict>
 			<key>cell</key>
@@ -102,7 +168,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Copyright (C) 2014 Elijah Frederickson</string>
+			<string>Copyright (C) 2014 Elijah Frederickson. Icon provided by Wojtek Witkowski.</string>
 		</dict>
 
 	</array>
