@@ -1,4 +1,7 @@
 #import <substrate.h>
+#import "FSSwitchDataSource.h"
+#import "FSSwitchPanel.h"
+#import "FSSwitchState.h"
 
 @interface BBBulletin
 - (id)title;
@@ -12,6 +15,8 @@ static BOOL blockAfterFirstOfEachTitle = YES;
 static BOOL allowAfterAWhile = YES;
 static int timeToWait = 90;
 static NSDate *lastNotificationTime = nil;
+static BOOL disableWhenRinger = NO;
+static BOOL onlyReEnableNoise = YES;
 
 static void reloadSettings(CFNotificationCenterRef center,
                                     void *observer,
@@ -51,6 +56,16 @@ static void reloadSettings(CFNotificationCenterRef center,
         timeToWait = [[prefs objectForKey:@"timeToWait"] intValue];
     else
         timeToWait = 90;
+
+    if ([prefs objectForKey:@"disableWhenRinger"] != nil)
+        disableWhenRinger = [[prefs objectForKey:@"disableWhenRinger"] boolValue];
+    else
+        disableWhenRinger = NO;
+
+    if ([prefs objectForKey:@"onlyReEnableNoise"] != nil)
+        onlyReEnableNoise = [[prefs objectForKey:@"onlyReEnableNoise"] boolValue];
+    else
+        onlyReEnableNoise = YES;
 
     //NSLog(@"OnlyOneNotification: preferences updated");
     //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", blockFirstAsWell ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
@@ -103,7 +118,11 @@ static int getCount(NSString *item)
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
 
-    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO)
+    BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
+    BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
+    inverse_disableForRinger = onlyReEnableNoise ? YES : inverse_disableForRinger;
+
+    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO && inverse_disableForRinger)
     {
         if (allowAfterAWhile)
         {
@@ -122,7 +141,7 @@ static int getCount(NSString *item)
         }
     }
 
-    if (enabled && blockAfterFirstOfEachTitle && updateCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1))
+    if (enabled && blockAfterFirstOfEachTitle && updateCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1) && inverse_disableForRinger)
     {
         if (allowAfterAWhile)
         {
@@ -147,8 +166,11 @@ static int getCount(NSString *item)
 
 - (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
 {
+    BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
+    BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
+
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if (([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise))
+    if ((([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise)) && inverse_disableForRinger)
         return NO;
     return %orig;
 

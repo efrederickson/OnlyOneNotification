@@ -7,6 +7,7 @@ ARCHS=armv7 armv7s arm64
 
 TWEAK_NAME = OnlyOneNotification
 OnlyOneNotification_FILES = Tweak.xm
+OnlyOneNotification_LIBRARIES = flipswitch
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

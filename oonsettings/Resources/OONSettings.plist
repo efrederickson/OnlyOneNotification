@@ -66,6 +66,34 @@
 			<key>PostNotification</key>
 			<string>com.lodc.ios.oon/reloadSettings</string>
 		</dict> 
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>disableWhenRinger</string>
+			<key>label</key>
+			<string>Disable OON when ringer is on</string>
+			<key>PostNotification</key>
+			<string>com.lodc.ios.oon/reloadSettings</string>
+		</dict> 
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.lodc.ios.oonsettings</string>
+			<key>key</key>
+			<string>onlyReEnableNoise</string>
+			<key>label</key>
+			<string>- only reenable noise</string>
+			<key>PostNotification</key>
+			<string>com.lodc.ios.oon/reloadSettings</string>
+		</dict> 
                 <dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
