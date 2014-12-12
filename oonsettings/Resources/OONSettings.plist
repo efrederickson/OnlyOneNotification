@@ -141,11 +141,11 @@
 				</dict>
 			</array>
 		</dict>
-                <dict>
+        <dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-                        <key>label</key>
-                        <string>Length of a while (minutes)</string>
+            <key>label</key>
+            <string>Length of a while (minutes)</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -165,11 +165,9 @@
 			<key>PostNotification</key>
 			<string>com.locd.ios.oon/reloadSettings</string>
 		</dict>
-                <dict>
+        <dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-                        <key>label</key>
-                        <string></string>
 		</dict>
  		<dict>
 			<key>cell</key>
@@ -179,11 +177,11 @@
 			<key>label</key>
 			<string>Help</string>
 		</dict>
-                <dict>
+        <dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-                        <key>label</key>
-                        <string>Developer information</string>
+            <key>label</key>
+            <string>Developer information</string>
 		</dict>
                 <dict>
 			<key>action</key>
@@ -191,7 +189,7 @@
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>@mlnlover11 on Twitter</string>
+			<string>@daementor on Twitter</string>
 		</dict>
                 <dict>
 			<key>action</key>
@@ -208,22 +206,6 @@
 			<string>PSButtonCell</string>
 			<key>label</key>
 			<string>Contact developer via email</string>
-		</dict>
-                <dict>
-			<key>action</key>
-			<string>donatePaypal</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Donate via Paypal</string>
-		</dict>
-                <dict>
-			<key>action</key>
-			<string>donateBitcoin</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Donate via Bitcoin</string>
 		</dict>
 		<dict>
 			<key>cell</key>

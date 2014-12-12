@@ -14,7 +14,7 @@
 
 -(void) openTwitter
 {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"twitter://user?screen_name=mlnlover11"]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"twitter://user?screen_name=daementor"]];
 }
 
 -(void) openGithub
@@ -26,18 +26,6 @@
 {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"mailto:elijah.frederickson@gmail.com?subject=OnlyOneNotification"]];
 }
-
--(void) donatePaypal
-{
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6ZLWPUSTR7XLQ&lc=US&item_name=OnlyOneNotification%20Donations&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"]];
-    
-}
-
--(void) donateBitcoin
-{
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://coinbase.com/checkouts/9066da6836ac005ad852734fa3567288"]];
-}
-
 @end
 
 @interface OONHelpListController: PSListController {
