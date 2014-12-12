@@ -1,4 +1,5 @@
 ARCHS = armv7 armv7s arm64
+CFLAGS = -fobjc-arc
 TARGET = iphone:clang:latest:latest
 
 include $(THEOS)/makefiles/common.mk
@@ -6,6 +7,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = OnlyOneNotification
 OnlyOneNotification_FILES = Tweak.xm
 OnlyOneNotification_LIBRARIES = flipswitch
+OnlyOneNotification_FRAMEWORKS = UIKit
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

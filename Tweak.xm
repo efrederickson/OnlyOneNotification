@@ -1,20 +1,16 @@
 #import <substrate.h>
-#import "FSSwitchDataSource.h"
-#import "FSSwitchPanel.h"
-#import "FSSwitchState.h"
+#import "onlyonenotificationflipswitch/FSSwitchDataSource.h"
+#import "onlyonenotificationflipswitch/FSSwitchPanel.h"
+#import "onlyonenotificationflipswitch/FSSwitchState.h"
 #import "BBBulletin.h"
 
 #define DEBUG
 #ifdef DEBUG
-#define DEBUG_PREFIX @"[OnlyOneNotification]"
-#define DebugLog(s, ...) \
-NSLog(@"[OnlyOneNotification] %@", \
-[NSString stringWithFormat:(s), ##__VA_ARGS__] \
-)
+#define DebugLog(fmt, ...) NSLog((@"[OnlyOneNotification] " fmt), ##__VA_ARGS__)
 #else
 #define DebugLog(s, ...)
 #endif
-#define IS_OS_8_OR_HIGHER [[[%c(UIDevice) currentDevice] systemVersion] floatValue] >= 8.0
+#define IS_OS_8_OR_HIGHER (UIDevice.currentDevice.systemVersion.floatValue >= 8.0)
 
 static NSDictionary *prefs;
 static BOOL enabled = YES;
@@ -51,7 +47,7 @@ static void reloadSettings(CFNotificationCenterRef center,
             DebugLog(@"There's been an error getting the key list!");
             return;
         }
-        prefs = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        prefs = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
     }
     
     id obj = [prefs objectForKey:@"enabled"];
@@ -84,11 +80,6 @@ static void reloadSettings(CFNotificationCenterRef center,
     
     timeToWait = [[prefs objectForKey:@"timeToWait"] intValue] ?: 90;
     DebugLog(@"timeToWait = %d", timeToWait);
-    
-    obj = nil;
-
-    //NSLog(@"OnlyOneNotification: preferences updated");
-    //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", blockFirstAsWell ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
 }
 
 
@@ -119,20 +110,6 @@ static int updateCount(NSString *item)
     return count;
 }
 
-/*
-static int getCount(NSString *item)
-{
-    if (item == 
-    id i1 = [notifs objectForKey:item];
-    int count;
-    if (i1 == nil)
-        count = 0;
-    else
-        count = [i1 intValue];
-    return count;
-}
-*/
-
 %hook SBLockScreenNotificationListController
 
 - (void)turnOnScreenIfNecessaryForItem:(BBBulletin*)arg1
@@ -152,13 +129,13 @@ static int getCount(NSString *item)
             { }
             else
             {
-                lastNotificationTime = [[NSDate date] retain];
+                lastNotificationTime = [NSDate date];
                 return;
             }
         }
         else
         {
-            lastNotificationTime = [[NSDate date] retain];
+            lastNotificationTime = [NSDate date];
             return;
         }
     }
@@ -172,20 +149,19 @@ static int getCount(NSString *item)
             { }
             else
             {
-                lastNotificationTime = [[NSDate date] retain];
+                lastNotificationTime = [NSDate date];
                 return;
             }
         }
         else
         {
-            lastNotificationTime = [[NSDate date] retain];
+            lastNotificationTime = [NSDate date];
             return;
         }
     }
 
-    DebugLog(@"We're calling %%orig;");
     %orig;
-    lastNotificationTime = [[NSDate date] retain];
+    lastNotificationTime = [NSDate date];
 }
 
 - (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
@@ -198,32 +174,6 @@ static int getCount(NSString *item)
     if ((([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise)) && inverse_disableForRinger && sectionIDOkay)
         return NO;
     return %orig;
-
-    /*
-    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO && disableNoise)
-    {
-        if (allowAfterAWhile)
-        {
-            if (hasItBeenAWhile() == NO)
-                return NO;
-        }
-        else
-            return NO;
-    }
-
-    if (enabled && blockAfterFirstOfEachTitle && getCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1) && disableNoise)
-    {
-        if (allowAfterAWhile)
-        {
-            if (hasItBeenAWhile() == NO)
-                return NO;
-        }
-        else
-            return NO;
-    }
-
-    return %orig;
-    */
 }
 
 %end
@@ -232,14 +182,12 @@ static int getCount(NSString *item)
 -(void)_updateLockState
 {
     %orig;
-    notifs = [[[NSMutableDictionary alloc] init] retain]; // Clear state
+    notifs = [NSMutableDictionary dictionary]; // Clear state
 }
 %end
 
 %ctor
 {
-     // Register for the preferences-did-change notification
-    CFNotificationCenterRef r = CFNotificationCenterGetDarwinNotifyCenter();
-    CFNotificationCenterAddObserver(r, NULL, &reloadSettings, CFSTR("com.lodc.ios.oon/reloadSettings"), NULL, 0);
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.lodc.ios.oon/reloadSettings"), NULL, 0);
     reloadSettings(nil, nil, nil, nil, nil);
 }
