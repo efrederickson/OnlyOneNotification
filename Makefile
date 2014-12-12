@@ -1,7 +1,7 @@
 ARCHS = armv7 armv7s arm64
 TARGET = iphone:clang:latest:latest
 
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = OnlyOneNotification
 OnlyOneNotification_FILES = Tweak.xm
