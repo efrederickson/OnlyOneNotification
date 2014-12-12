@@ -2,21 +2,32 @@
 #import "FSSwitchDataSource.h"
 #import "FSSwitchPanel.h"
 #import "FSSwitchState.h"
+#import "BBBulletin.h"
 
-@interface BBBulletin
-- (id)title;
-@end
+#define DEBUG
+#ifdef DEBUG
+#define DEBUG_PREFIX @"[OnlyOneNotification]"
+#define DebugLog(s, ...) \
+NSLog(@"[OnlyOneNotification] %@", \
+[NSString stringWithFormat:(s), ##__VA_ARGS__] \
+)
+#else
+#define DebugLog(s, ...)
+#endif
+#define IS_OS_8_OR_HIGHER [[[%c(UIDevice) currentDevice] systemVersion] floatValue] >= 8.0
 
+static NSDictionary *prefs;
 static BOOL enabled = YES;
 static BOOL disableNoise = YES;
 static BOOL blockFirstAsWell = YES;
 static NSMutableDictionary *notifs = [[NSMutableDictionary alloc] init];
 static BOOL blockAfterFirstOfEachTitle = YES;
 static BOOL allowAfterAWhile = YES;
-static int timeToWait = 90;
 static NSDate *lastNotificationTime = nil;
 static BOOL disableWhenRinger = NO;
 static BOOL onlyReEnableNoise = YES;
+static int timeToWait;
+static NSMutableDictionary *blacklistedApps = [[NSMutableDictionary alloc] init];
 
 static void reloadSettings(CFNotificationCenterRef center,
                                     void *observer,
@@ -24,52 +35,62 @@ static void reloadSettings(CFNotificationCenterRef center,
                                     const void *object,
                                     CFDictionaryRef userInfo)
 {
-    NSDictionary *prefs = [NSDictionary 
-        dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
+    prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
+    NSArray *keys = [prefs allKeys];
+    for (NSString *key in keys) {
+        if ([key hasPrefix:@"blacklisted-"]) {
+            NSString *bundleID = [key substringFromIndex:12];
+            [blacklistedApps setObject:[prefs objectForKey:key] forKey:bundleID];
+        }
+    }
     
-    if ([prefs objectForKey:@"enabled"] != nil)
-        enabled = [[prefs objectForKey:@"enabled"] boolValue];
-    else
-        enabled = YES;
+    if (IS_OS_8_OR_HIGHER) { //CFPreferences should work on <iOS 8, but in my experience, it hasn't, so we'll stick with the preference plist.
+        CFStringRef appID = CFSTR("com.lodc.ios.oonsettings");
+        CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (!keyList) {
+            DebugLog(@"There's been an error getting the key list!");
+            return;
+        }
+        prefs = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    }
+    
+    id obj = [prefs objectForKey:@"enabled"];
+    enabled = obj ? [obj boolValue] : YES;
+    DebugLog(@"enabled = %d", enabled);
  
-    if ([prefs objectForKey:@"disableNoise"] != nil)    
-        disableNoise = [[prefs objectForKey:@"disableNoise"] boolValue];
-    else
-        disableNoise = YES;
+    obj = [prefs objectForKey:@"disableNoise"];
+    disableNoise = obj ? [obj boolValue] : YES;
+    DebugLog(@"disableNoise = %d", disableNoise);
+    
+    obj = [prefs objectForKey:@"blockFirstAsWell"];
+    blockFirstAsWell = [obj boolValue];
+    DebugLog(@"blockFirstAsWell = %d", blockFirstAsWell);
 
-    if ([prefs objectForKey:@"blockFirstAsWell"] != nil)    
-        blockFirstAsWell = [[prefs objectForKey:@"blockFirstAsWell"] boolValue];
-    else
-        blockFirstAsWell = NO;
+    obj = [prefs objectForKey:@"blockAfterFirstOfEachTitle"];
+    blockAfterFirstOfEachTitle = obj ? [obj boolValue] : YES;
+    DebugLog(@"blockAfterFirstOfEachTitle = %d", blockAfterFirstOfEachTitle);
 
-    if ([prefs objectForKey:@"blockAfterFirstOfEachTitle"] != nil)    
-        blockAfterFirstOfEachTitle = [[prefs objectForKey:@"blockAfterFirstOfEachTitle"] boolValue];
-    else
-        blockAfterFirstOfEachTitle = YES;
+    obj = [prefs objectForKey:@"allowAfterAWhile"];
+    allowAfterAWhile = obj ? [obj boolValue] : YES;
+    DebugLog(@"allowAfterAWhile = %d", allowAfterAWhile);
 
-    if ([prefs objectForKey:@"allowAfterAWhile"] != nil)    
-        allowAfterAWhile = [[prefs objectForKey:@"allowAfterAWhile"] boolValue];
-    else
-        allowAfterAWhile = YES;
+    obj = [prefs objectForKey:@"disableWhenRinger"];
+    disableWhenRinger = [obj boolValue];
+    DebugLog(@"disableWhenRinger = %d", disableWhenRinger);
 
-    if ([prefs objectForKey:@"timeToWait"] != nil)    
-        timeToWait = [[prefs objectForKey:@"timeToWait"] intValue];
-    else
-        timeToWait = 90;
-
-    if ([prefs objectForKey:@"disableWhenRinger"] != nil)
-        disableWhenRinger = [[prefs objectForKey:@"disableWhenRinger"] boolValue];
-    else
-        disableWhenRinger = NO;
-
-    if ([prefs objectForKey:@"onlyReEnableNoise"] != nil)
-        onlyReEnableNoise = [[prefs objectForKey:@"onlyReEnableNoise"] boolValue];
-    else
-        onlyReEnableNoise = YES;
+    obj = [prefs objectForKey:@"onlyReEnableNoise"];
+    onlyReEnableNoise = obj ? [obj boolValue] : YES;
+    DebugLog(@"onlyReEnableNoise = %d", onlyReEnableNoise);
+    
+    timeToWait = [[prefs objectForKey:@"timeToWait"] intValue] ?: 90;
+    DebugLog(@"timeToWait = %d", timeToWait);
+    
+    obj = nil;
 
     //NSLog(@"OnlyOneNotification: preferences updated");
     //NSLog(@"OnlyOneNotification: DisableAll, disableNoise: %@ , %@", blockFirstAsWell ? @"yes" : @"no", disableNoise ? @"yes" : @"no");
 }
+
 
 static BOOL hasItBeenAWhile()
 {
@@ -118,31 +139,13 @@ static int getCount(NSString *item)
 {
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
 
+    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
     BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
     inverse_disableForRinger = onlyReEnableNoise ? YES : inverse_disableForRinger;
-
-    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && blockAfterFirstOfEachTitle == NO && inverse_disableForRinger)
+    if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && !blockAfterFirstOfEachTitle && inverse_disableForRinger && sectionIDOkay)
     {
-        if (allowAfterAWhile)
-        {
-            if (hasItBeenAWhile())
-            { }
-            else 
-            {
-                lastNotificationTime = [[NSDate date] retain];
-                return;
-            }
-        }
-        else
-        {
-            lastNotificationTime = [[NSDate date] retain];
-            return;
-        }
-    }
-
-    if (enabled && blockAfterFirstOfEachTitle && updateCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1) && inverse_disableForRinger)
-    {
+        DebugLog(@"We got in the first screen test");
         if (allowAfterAWhile)
         {
             if (hasItBeenAWhile())
@@ -160,17 +163,39 @@ static int getCount(NSString *item)
         }
     }
 
+    if (enabled && blockAfterFirstOfEachTitle && updateCount([arg1 title]) >= (blockFirstAsWell ? 0 : 1) && inverse_disableForRinger && sectionIDOkay)
+    {
+        DebugLog(@"We got in the second screen test");
+        if (allowAfterAWhile)
+        {
+            if (hasItBeenAWhile())
+            { }
+            else
+            {
+                lastNotificationTime = [[NSDate date] retain];
+                return;
+            }
+        }
+        else
+        {
+            lastNotificationTime = [[NSDate date] retain];
+            return;
+        }
+    }
+
+    DebugLog(@"We're calling %%orig;");
     %orig;
     lastNotificationTime = [[NSDate date] retain];
 }
 
 - (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
 {
+    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
     BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
 
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
-    if ((([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise)) && inverse_disableForRinger)
+    if ((([li count] > 1 && disableNoise && enabled) || (enabled && blockFirstAsWell && disableNoise)) && inverse_disableForRinger && sectionIDOkay)
         return NO;
     return %orig;
 

@@ -1,9 +1,7 @@
-THEOS_DEVICE_IP = 192.168.7.146
-THEOS_DEVICE_PORT = 22
+ARCHS = armv7 armv7s arm64
+TARGET = iphone:clang:latest:latest
 
 include theos/makefiles/common.mk
-
-ARCHS=armv7 armv7s arm64
 
 TWEAK_NAME = OnlyOneNotification
 OnlyOneNotification_FILES = Tweak.xm

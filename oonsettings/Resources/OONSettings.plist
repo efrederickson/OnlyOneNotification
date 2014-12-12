@@ -108,6 +108,39 @@
 			<key>PostNotification</key>
 			<string>com.lodc.ios.oon/reloadSettings</string>
 		</dict> 
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>bundle</key>
+			<string>AppList</string>
+			<key>isController</key>
+			<true/>
+			<key>label</key>
+			<string>Whitelisted Apps</string>
+			<key>ALSettingsPath</key>
+			<string>/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist</string>
+			<key>ALSettingsKeyPrefix</key>
+			<string>blacklisted-</string>
+			<key>ALChangeNotification</key>
+			<string>com.lodc.ios.oon/reloadSettings</string>
+			<key>ALAllowsSelection</key>
+			<true/>
+			<key>ALSectionDescriptors</key>
+			<array>
+				<dict>
+					<key>title</key>
+					<string>Whitelisted apps</string>
+					<key>cell-class-name</key>
+					<string>ALCheckCell</string>
+					<key>suppress-hidden-apps</key>
+					<true/>
+					<key>icon-size</key>
+					<integer>29</integer>
+					<key>footer-title</key>
+					<string>These apps' notifications will be shown no matter what. Check clock for alarms to be heard.</string>
+				</dict>
+			</array>
+		</dict>
                 <dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>

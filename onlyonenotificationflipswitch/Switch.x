@@ -5,25 +5,25 @@
 @interface OnlyOneNotificationFlipswitchSwitch : NSObject <FSSwitchDataSource>
 @end
 
+@interface NSUserDefaults (Private)
+- (instancetype)_initWithSuiteName:(NSString *)suiteName container:(NSURL *)container;
+@end
+
 @implementation OnlyOneNotificationFlipswitchSwitch
 
 - (FSSwitchState)stateForSwitchIdentifier:(NSString *)switchIdentifier
 {
-    NSDictionary *prefs = [NSDictionary 
-        dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
-    if ([prefs objectForKey:@"enabled"] != nil)
-        return [[prefs objectForKey:@"enabled"] boolValue] ? FSSwitchStateOn : FSSwitchStateOff;
-    else
-        return FSSwitchStateOn;
+	id obj = CFPreferencesCopyAppValue(CFSTR("enabled"), CFSTR("com.lodc.ios.oonsettings"));
+	BOOL state = obj ? [obj boolValue] : YES;
+    return (state) ? FSSwitchStateOn : FSSwitchStateOff;
 }
 
 - (void)applyState:(FSSwitchState)newState forSwitchIdentifier:(NSString *)switchIdentifier
 {
     if (newState == FSSwitchStateIndeterminate)
         return;
-    NSMutableDictionary *prefs = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist"];
-    [prefs setObject:[NSNumber numberWithBool:newState] forKey:@"enabled"];
-    [prefs writeToFile:@"/var/mobile/Library/Preferences/com.lodc.ios.oonsettings.plist" atomically:YES];
+    CFBooleanRef newValue = (BOOL)newState ? kCFBooleanTrue : kCFBooleanFalse;
+    CFPreferencesSetAppValue ( CFSTR("enabled"), newValue, CFSTR("com.lodc.ios.oonsettings") );
     notify_post("com.lodc.ios.oon/reloadSettings");
 }
 
