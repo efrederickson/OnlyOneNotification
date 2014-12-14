@@ -117,7 +117,7 @@ static int updateCount(NSString *item)
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
 
     BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
-    BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
+    BOOL ringer = %c(FSSwitchPanel) ? ([[%c(FSSwitchPanel) sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO) : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
     inverse_disableForRinger = onlyReEnableNoise ? YES : inverse_disableForRinger;
     if ([li count] > (blockFirstAsWell ? 0 : 1) && enabled && !blockAfterFirstOfEachTitle && inverse_disableForRinger && sectionIDOkay)
@@ -167,7 +167,7 @@ static int updateCount(NSString *item)
 - (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
 {
     BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
-    BOOL ringer = [[FSSwitchPanel sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO;
+    BOOL ringer = %c(FSSwitchPanel) ? ([[%c(FSSwitchPanel) sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO) : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
 
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");

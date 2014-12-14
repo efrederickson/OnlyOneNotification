@@ -1,6 +1,6 @@
 Package: com.lodc.ios.onlyonenotification
 Name: OnlyOneNotification
-Depends: mobilesubstrate
+Depends: mobilesubstrate, preferenceloader, applist
 Version: 0.0.2
 Architecture: iphoneos-arm
 Description: Only the first LS notification turns on the screen
