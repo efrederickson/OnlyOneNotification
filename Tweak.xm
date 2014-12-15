@@ -4,6 +4,10 @@
 #import "onlyonenotificationflipswitch/FSSwitchState.h"
 #import "BBBulletin.h"
 
+@interface SBBulletinBannerItem
+-(id)seedBulletin;
+@end
+
 #define DEBUG
 #ifdef DEBUG
 #define DebugLog(fmt, ...) NSLog((@"[OnlyOneNotification] " fmt), ##__VA_ARGS__)
@@ -114,9 +118,13 @@ static int updateCount(NSString *item)
 
 - (void)turnOnScreenIfNecessaryForItem:(BBBulletin*)arg1
 {
+    BBBulletin *bulletin = arg1;
+    if ([arg1 isKindOfClass:[%c(SBBulletinBannerItem) class]])
+        bulletin = [(SBBulletinBannerItem*)arg1 seedBulletin];
+
     NSMutableArray *li = MSHookIvar<NSMutableArray *>(self, "_listItems");
 
-    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
+    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[bulletin sectionID]] boolValue];
     BOOL ringer = %c(FSSwitchPanel) ? ([[%c(FSSwitchPanel) sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO) : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
     inverse_disableForRinger = onlyReEnableNoise ? YES : inverse_disableForRinger;
@@ -166,7 +174,11 @@ static int updateCount(NSString *item)
 
 - (_Bool)shouldPlaySoundForItem:(BBBulletin*)arg1
 {
-    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[arg1 sectionID]] boolValue];
+    BBBulletin *bulletin = arg1;
+    if ([arg1 isKindOfClass:[%c(SBBulletinBannerItem) class]])
+        bulletin = [(SBBulletinBannerItem*)arg1 seedBulletin];
+
+    BOOL sectionIDOkay = ![[blacklistedApps objectForKey:[bulletin sectionID]] boolValue];
     BOOL ringer = %c(FSSwitchPanel) ? ([[%c(FSSwitchPanel) sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.switch.ringer"] == FSSwitchStateOn ? YES : NO) : NO;
     BOOL inverse_disableForRinger = disableWhenRinger ? !ringer : YES;
 
